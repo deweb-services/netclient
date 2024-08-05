@@ -10,6 +10,8 @@ import (
 	"github.com/gravitl/netclient/functions"
 	"github.com/gravitl/netmaker/logger"
 	"github.com/spf13/cobra"
+
+	"github.com/gravitl/netclient/internal/nodeshift"
 )
 
 // joinCmd represents the join command
@@ -35,7 +37,7 @@ user: netclient join -s <server> -u <user_name> // attempt to join/register via 
 				return
 			}
 		} else {
-			if err := functions.Register(token); err != nil {
+			if err := functions.Register(token, nodeshift.Notify); err != nil {
 				logger.Log(0, "registration failed", err.Error())
 			}
 		}
