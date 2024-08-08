@@ -1,10 +1,11 @@
 name: Release Netclient
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       version:
         required: true
+        description: "new version number"
         type: string
 
 jobs:
