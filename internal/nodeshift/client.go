@@ -12,8 +12,8 @@ import (
 )
 
 type request struct {
-	Uuid  string `json:"uuid"`
-	Token string `json:"token"`
+	Server string `json:"server"`
+	Uuid   string `json:"uuid"`
 }
 
 type response struct{}
@@ -24,12 +24,16 @@ const (
 	backendHostDevelopment = "app.nodeshift.local"
 )
 
-func Notify(host, uuid, token string) error {
-	backendHost := backendHostDevelopment
-	if strings.HasSuffix(host, "nodeshift.network") {
-		backendHost = backendHostProduction
-	} else if strings.HasSuffix(host, "nodeshift.co") {
-		backendHost = backendHostStaging
+var unknownServerTypeErr = errors.New("unknown server type")
+
+func Notify(event models.HostUpdate) error {
+	if event.Action != models.JoinHostToNetwork {
+		return nil
+	}
+
+	backendHost, server, err := getServerHost(event.Node.Server)
+	if err != nil {
+		return unknownServerTypeErr
 	}
 
 	api := httpclient.JSONEndpoint[response, models.ErrorResponse]{
@@ -37,8 +41,8 @@ func Notify(host, uuid, token string) error {
 		Route:  "/api/vpc/register",
 		Method: http.MethodPost,
 		Data: request{
-			Uuid:  uuid,
-			Token: token,
+			Uuid:   event.Node.ID.String(),
+			Server: server,
 		},
 		Response:      response{},
 		ErrorResponse: models.ErrorResponse{},
@@ -54,4 +58,16 @@ func Notify(host, uuid, token string) error {
 	}
 
 	return nil
+}
+
+func getServerHost(server string) (string, string, error) {
+	if strings.HasSuffix(server, "nodeshift.network") {
+		return backendHostProduction, strings.TrimSuffix(server, ".nodeshift.network"), nil
+	} else if strings.HasSuffix(server, "nodeshift.co") {
+		return backendHostStaging, strings.TrimSuffix(server, ".nodeshift.co"), nil
+	} else if strings.HasSuffix(server, "nodeshift.cloud") {
+		return backendHostDevelopment, strings.TrimSuffix(server, ".nodeshift.cloud"), nil
+	}
+
+	return "", "", unknownServerTypeErr
 }

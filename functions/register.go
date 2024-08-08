@@ -18,10 +18,8 @@ import (
 	"github.com/gravitl/netmaker/models"
 )
 
-type Callback func(host, uuid, token string) error
-
 // Register - should be simple to register with a token
-func Register(token string, callbacks ...Callback) error {
+func Register(token string) error {
 	data, err := b64.StdEncoding.DecodeString(token)
 	if err != nil {
 		logger.FatalLog("could not read enrollment token")
@@ -72,13 +70,6 @@ func Register(token string, callbacks ...Callback) error {
 		fmt.Println("WARNING: Joining any network on another server will disconnect netclient from the networks of the current server ->", config.CurrServer)
 	}
 	handleRegisterResponse(&registerResponse)
-
-	for _, callback := range callbacks {
-		if err := callback(serverData.Server, registerResponse.RequestedHost.ID.String(), token); err != nil {
-			logger.FatalLog("error registering with callback", err.Error())
-		}
-	}
-
 	return nil
 }
 
