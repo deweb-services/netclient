@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -13,8 +14,9 @@ import (
 )
 
 type request struct {
-	Server string `json:"server"`
-	Uuid   string `json:"uuid"`
+	ID      int    `json:"id"`
+	Uuid    string `json:"uuid"`
+	Network string `json:"network"`
 }
 
 type response struct{}
@@ -32,7 +34,7 @@ func Notify(event models.HostUpdate) error {
 		return nil
 	}
 
-	backendHost, server, err := getServerHost(event.Node.Server)
+	backendHost, vpcID, err := getIDHost(event.Node.Server)
 	if err != nil {
 		return fmt.Errorf("failed to get sever and backendHost: %s", err)
 	}
@@ -42,8 +44,9 @@ func Notify(event models.HostUpdate) error {
 		Route:  "/api/vpc/register",
 		Method: http.MethodPost,
 		Data: request{
-			Uuid:   event.Node.ID.String(),
-			Server: server,
+			ID:      vpcID,
+			Uuid:    event.Node.ID.String(),
+			Network: event.Node.Network,
 		},
 		Response:      response{},
 		ErrorResponse: models.ErrorResponse{},
@@ -61,14 +64,29 @@ func Notify(event models.HostUpdate) error {
 	return nil
 }
 
-func getServerHost(server string) (string, string, error) {
-	if strings.HasSuffix(server, "nodeshift.network") {
-		return backendHostProduction, strings.TrimSuffix(server, ".nodeshift.network"), nil
-	} else if strings.HasSuffix(server, "nodeshift.co") {
-		return backendHostStaging, strings.TrimSuffix(server, ".nodeshift.co"), nil
-	} else if strings.HasSuffix(server, "nodeshift.cloud") {
-		return backendHostDevelopment, strings.TrimSuffix(server, ".nodeshift.cloud"), nil
+func getIDHost(server string) (string, int, error) {
+	r, err := regexp.Compile(`.*-([0-9]+)\..*`)
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to compile regex: %s", err)
 	}
 
-	return "", "", errUnknownServerType
+	matches := r.FindStringSubmatch(server)
+	if len(matches) != 2 {
+		return "", 0, fmt.Errorf("failed to find vpc id: %v", matches)
+	}
+
+	id, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return "", 0, fmt.Errorf("failed to convert id to int: %s", err)
+	}
+
+	if strings.HasSuffix(server, "nodeshift.network") {
+		return backendHostProduction, id, nil
+	} else if strings.HasSuffix(server, "nodeshift.co") {
+		return backendHostStaging, id, nil
+	} else if strings.HasSuffix(server, "nodeshift.cloud") {
+		return backendHostDevelopment, id, nil
+	}
+
+	return "", 0, errUnknownServerType
 }
