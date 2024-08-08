@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/devilcove/httpclient"
-	"github.com/gravitl/netmaker/logger"
 	"github.com/gravitl/netmaker/models"
 )
 
@@ -19,7 +18,9 @@ type request struct {
 	Network string `json:"network"`
 }
 
-type response struct{}
+type response struct {
+	Message string `json:"message"`
+}
 
 const (
 	backendHostProduction  = "app.nodeshift.com"
@@ -39,7 +40,7 @@ func Notify(event models.HostUpdate) error {
 		return fmt.Errorf("failed to get sever and backendHost: %s", err)
 	}
 
-	api := httpclient.JSONEndpoint[response, models.ErrorResponse]{
+	api := httpclient.JSONEndpoint[response, response]{
 		URL:    "https://" + backendHost,
 		Route:  "/api/vpc/register",
 		Method: http.MethodPost,
@@ -49,13 +50,13 @@ func Notify(event models.HostUpdate) error {
 			Network: event.Node.Network,
 		},
 		Response:      response{},
-		ErrorResponse: models.ErrorResponse{},
+		ErrorResponse: response{},
 	}
 
-	_, errData, err := api.GetJSON(response{}, models.ErrorResponse{})
+	_, errData, err := api.GetJSON(response{}, response{})
 	if err != nil {
-		if errors.Is(err, httpclient.ErrStatus) {
-			logger.FatalLog("error registering with server", strconv.Itoa(errData.Code), errData.Message)
+		if strings.Contains(errData.Message, "success") {
+			return nil
 		}
 
 		return err
