@@ -2,6 +2,7 @@ package nodeshift
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -24,7 +25,7 @@ const (
 	backendHostDevelopment = "app.nodeshift.local"
 )
 
-var unknownServerTypeErr = errors.New("unknown server type")
+var errUnknownServerType = errors.New("unknown server type")
 
 func Notify(event models.HostUpdate) error {
 	if event.Action != models.JoinHostToNetwork {
@@ -33,7 +34,7 @@ func Notify(event models.HostUpdate) error {
 
 	backendHost, server, err := getServerHost(event.Node.Server)
 	if err != nil {
-		return unknownServerTypeErr
+		return fmt.Errorf("failed to get sever and backendHost: %s", err)
 	}
 
 	api := httpclient.JSONEndpoint[response, models.ErrorResponse]{
@@ -69,5 +70,5 @@ func getServerHost(server string) (string, string, error) {
 		return backendHostDevelopment, strings.TrimSuffix(server, ".nodeshift.cloud"), nil
 	}
 
-	return "", "", unknownServerTypeErr
+	return "", "", errUnknownServerType
 }
