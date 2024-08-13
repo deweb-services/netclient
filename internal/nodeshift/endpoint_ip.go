@@ -16,7 +16,7 @@ func EndpointIPPoller(retry, timeout time.Duration) func() error {
 		return func() error { return nil }
 	}
 	if timeout == 0 {
-		timeout = 10 * time.Second
+		timeout = 120 * time.Second
 	}
 
 	return func() error {

@@ -5,8 +5,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 
 	"github.com/gravitl/netclient/functions"
 	"github.com/gravitl/netclient/internal/nodeshift"

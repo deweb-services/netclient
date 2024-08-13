@@ -40,7 +40,9 @@ func Register(token string, handlers ...func() error) error {
 	}
 
 	for _, handler := range handlers {
-		handler()
+		if err := handler(); err != nil {
+			logger.Log(3, "failed to run handler", err.Error())
+		}
 	}
 
 	defaultInterface, err := getDefaultInterface()
