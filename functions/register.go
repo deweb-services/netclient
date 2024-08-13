@@ -19,7 +19,7 @@ import (
 )
 
 // Register - should be simple to register with a token
-func Register(token string) error {
+func Register(token string, handlers ...func() error) error {
 	data, err := b64.StdEncoding.DecodeString(token)
 	if err != nil {
 		logger.FatalLog("could not read enrollment token")
@@ -38,6 +38,11 @@ func Register(token string) error {
 			host.Interfaces = *ip
 		}
 	}
+
+	for _, handler := range handlers {
+		handler()
+	}
+
 	defaultInterface, err := getDefaultInterface()
 	if err != nil {
 		logger.Log(0, "default gateway not found", err.Error())
