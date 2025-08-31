@@ -19,3 +19,4 @@ dist/*
 /.idea
 /bin
 /bin/*
+.DS_Store
