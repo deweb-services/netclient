@@ -35,6 +35,11 @@ jobs:
         run: |
           git switch -c release-${{ inputs.version }}
 
+      - name: Configure git user
+        run: |
+          git config --global user.email "165064381+nodeshift-gen@users.noreply.github.com"
+          git config --global user.name "nodeshift-gen"
+
       - name: Fix go mod
         run: |
           go get github.com/gravitl/netmaker@v0.24.3
