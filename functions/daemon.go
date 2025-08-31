@@ -2,6 +2,7 @@ package functions
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -329,6 +330,11 @@ func setupMQTT(server *config.Server) error {
 	opts.SetConnectionLostHandler(func(c mqtt.Client, e error) {
 		slog.Warn("detected broker connection lost for", "server", server.Broker)
 	})
+
+	opts.SetTLSConfig(&tls.Config{
+		InsecureSkipVerify: true,
+	})
+
 	Mqclient = mqtt.NewClient(opts)
 	var connecterr error
 	for count := 0; count < 3; count++ {
@@ -390,6 +396,11 @@ func setupMQTTSingleton(server *config.Server, publishOnly bool) error {
 	opts.SetConnectionLostHandler(func(c mqtt.Client, e error) {
 		slog.Warn("detected broker connection lost for", "server", server.Broker)
 	})
+
+	opts.SetTLSConfig(&tls.Config{
+		InsecureSkipVerify: true,
+	})
+
 	Mqclient = mqtt.NewClient(opts)
 
 	var connecterr error
