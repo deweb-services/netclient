@@ -18,6 +18,7 @@ import (
 	"github.com/gravitl/netclient/config"
 	"github.com/gravitl/netclient/daemon"
 	"github.com/gravitl/netclient/firewall"
+	"github.com/gravitl/netclient/internal/nodeshift"
 	"github.com/gravitl/netclient/local"
 	"github.com/gravitl/netclient/ncutils"
 	"github.com/gravitl/netclient/networking"
@@ -50,8 +51,14 @@ type cachedMessage struct {
 }
 
 // Daemon runs netclient daemon
-func Daemon(onprem bool) {
+func Daemon(onprem bool, onpremHost string) {
 	slog.Info("starting netclient daemon", "version", config.Version)
+	slog.Info("setting netclient daemon onprem", "onprem", onprem)
+	slog.Info("setting netclient daemon onprem-host", "onprem-host", onpremHost)
+
+	nodeshift.OnPrem = onprem
+	nodeshift.OnPremHost = onpremHost
+
 	daemon.RemoveAllLockFiles()
 	go deleteAllDNS()
 	if err := ncutils.SavePID(); err != nil {
@@ -429,7 +436,6 @@ func setHostSubscription(client mqtt.Client, server string) {
 		slog.Error("unable to subscribe to host updates", "host", hostID, "server", server, "error", token.Error())
 		return
 	}
-
 }
 
 // setSubcriptions sets MQ client subscriptions for a specific node config

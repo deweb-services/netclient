@@ -12,6 +12,11 @@ import (
 	"github.com/gravitl/netmaker/models"
 )
 
+var (
+	OnPrem     = false
+	OnPremHost = ""
+)
+
 type request struct {
 	ID      int    `json:"id"`
 	Uuid    string `json:"uuid"`
@@ -79,6 +84,10 @@ func getIDHost(server string) (string, int, error) {
 	id, err := strconv.Atoi(matches[1])
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to convert id to int: %s", err)
+	}
+
+	if OnPrem {
+		return OnPremHost, id, nil
 	}
 
 	if strings.HasSuffix(server, "nodeshift.network") {

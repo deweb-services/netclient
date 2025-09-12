@@ -12,7 +12,7 @@ import (
 )
 
 // Install - installs binary/daemon
-func Install(onprem bool) error {
+func Install(onprem bool, onpremHost string) error {
 	source, err := os.Executable()
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func Install(onprem bool) error {
 		slog.Warn("stopping netclient daemon", "error", err)
 	}
 	time.Sleep(time.Second << 1)
-	if err := daemon.Install(onprem); err != nil {
+	if err := daemon.Install(onprem, onpremHost); err != nil {
 		slog.Error("daemon install error", "error", err)
 		return err
 	}
