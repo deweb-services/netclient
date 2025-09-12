@@ -23,7 +23,7 @@ User=root
 Type=simple
 ExecStartPre=/bin/sleep 17
 {{- if .OnPrem }}
-ExecStart=/sbin/netclient daemon --onprem
+ExecStart=/sbin/netclient daemon --onprem --onprem-host {{.OnPremHost}}
 {{- else }}
 ExecStart=/sbin/netclient daemon
 {{- end }}
@@ -35,11 +35,12 @@ WantedBy=multi-user.target
 `
 
 type UnitData struct {
-	OnPrem bool
+	OnPrem     bool
+	OnPremHost string
 }
 
 // setupSystemDDaemon - sets system daemon for supported machines
-func setupSystemDDaemon(onprem bool) error {
+func setupSystemDDaemon(onprem bool, onpremHost string) error {
 	tmpl, err := template.New("unit").Parse(systemdTemplate)
 	if err != nil {
 		return fmt.Errorf("error parsing systemd template: %w", err)

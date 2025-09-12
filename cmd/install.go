@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	onpremInstall bool
+	onpremInstall     bool
+	onpremInstallHost string
 )
 
 // installCmd represents the install command
@@ -22,13 +23,14 @@ var installCmd = &cobra.Command{
 
 ensure you specify the full path to then new binary to be installed`,
 	Run: func(cmd *cobra.Command, args []string) {
-		functions.Install(onpremInstall)
+		functions.Install(onpremInstall, onpremInstallHost)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(installCmd)
 	installCmd.Flags().BoolVarP(&onpremInstall, "onprem", "", false, "set if using on-prem server")
+	installCmd.Flags().StringVarP(&onpremInstallHost, "onprem-host", "", "", "set on-prem server host")
 
 	// Here you will define your flags and configuration settings.
 

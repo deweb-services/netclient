@@ -12,8 +12,8 @@ import (
 )
 
 // Install - Calls the correct function to install the netclient as a daemon service on the given operating system.
-func Install(onprem bool) error {
-	return install(onprem)
+func Install(onprem bool, onpremHost string) error {
+	return install(onprem, onpremHost)
 }
 
 // Restart - restarts a system daemon

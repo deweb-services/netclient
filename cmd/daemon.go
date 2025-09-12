@@ -4,14 +4,13 @@ Copyright © 2022 Netmaker Team <info@netmaker.io>
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/gravitl/netclient/functions"
 	"github.com/spf13/cobra"
 )
 
 var (
 	onpremDaemon bool
+	onpremHost   string
 )
 
 // daemonCmd represents the daemon command
@@ -20,14 +19,14 @@ var daemonCmd = &cobra.Command{
 	Short: "nodeshift daemon",
 	Long:  `nodeshift daemon gets and sends updates to netmaker server"`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("daemon called")
-		functions.Daemon(onpremDaemon)
+		functions.Daemon(onpremDaemon, onpremHost)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(daemonCmd)
 	daemonCmd.Flags().BoolVarP(&onpremDaemon, "onprem", "", false, "set if using on-prem server")
+	daemonCmd.Flags().StringVarP(&onpremHost, "onprem-host", "", "", "set on-prem server host")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
