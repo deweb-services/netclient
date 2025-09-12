@@ -46,7 +46,7 @@ func setupSystemDDaemon(onprem bool, onpremHost string) error {
 		return fmt.Errorf("error parsing systemd template: %w", err)
 	}
 	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, UnitData{OnPrem: onprem})
+	err = tmpl.Execute(&buf, UnitData{OnPrem: onprem, OnPremHost: onpremHost})
 	if err != nil {
 		return fmt.Errorf("error executing systemd template: %w", err)
 	}
